@@ -1,0 +1,1486 @@
+{
+  "name": "AI KYC Onboarding - Verification, Screening & Human Review",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Open your account - KYC verification",
+        "formDescription": "Complete your KYC in under 2 minutes. Enter details exactly as they appear on your PAN card and upload a clear photo of the PAN card (JPG or PNG).",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Full name (as on PAN)",
+              "fieldName": "full_name",
+              "placeholder": "e.g. Rahul Kumar Sharma",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Date of birth",
+              "fieldType": "date",
+              "fieldName": "dob",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "PAN number",
+              "fieldName": "pan",
+              "placeholder": "e.g. ABCPS1234K",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Last 4 digits of Aadhaar",
+              "fieldName": "aadhaar_last4",
+              "placeholder": "e.g. 4821",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "fieldName": "email",
+              "placeholder": "you@example.com",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Mobile number",
+              "fieldName": "mobile",
+              "placeholder": "10-digit mobile",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Residential address",
+              "fieldType": "textarea",
+              "fieldName": "address",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Nationality",
+              "fieldType": "dropdown",
+              "fieldName": "nationality",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Indian"
+                  },
+                  {
+                    "option": "Other"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Occupation",
+              "fieldType": "dropdown",
+              "fieldName": "occupation",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Salaried"
+                  },
+                  {
+                    "option": "Self-employed"
+                  },
+                  {
+                    "option": "Business owner"
+                  },
+                  {
+                    "option": "Student"
+                  },
+                  {
+                    "option": "Retired"
+                  },
+                  {
+                    "option": "Homemaker"
+                  },
+                  {
+                    "option": "Other"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Annual income",
+              "fieldType": "dropdown",
+              "fieldName": "annual_income",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Below Rs 5 lakh"
+                  },
+                  {
+                    "option": "Rs 5-25 lakh"
+                  },
+                  {
+                    "option": "Rs 25 lakh - 1 crore"
+                  },
+                  {
+                    "option": "Above Rs 1 crore"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Primary source of funds",
+              "fieldType": "dropdown",
+              "fieldName": "source_of_funds",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Salary"
+                  },
+                  {
+                    "option": "Business income"
+                  },
+                  {
+                    "option": "Investments"
+                  },
+                  {
+                    "option": "Pension"
+                  },
+                  {
+                    "option": "Inheritance or gift"
+                  },
+                  {
+                    "option": "Other"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Are you or a close relative a Politically Exposed Person (PEP)?",
+              "fieldType": "dropdown",
+              "fieldName": "pep",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "No"
+                  },
+                  {
+                    "option": "Yes"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Upload PAN card photo",
+              "fieldType": "file",
+              "fieldName": "id_document",
+              "multipleFiles": false,
+              "acceptFileTypes": ".jpg,.jpeg,.png",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Consent",
+              "fieldType": "checkbox",
+              "fieldName": "consent",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "I consent to verification of my details and documents for KYC/AML purposes"
+                  }
+                ]
+              },
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false,
+          "buttonLabel": "Submit for verification",
+          "path": "kyc-onboarding",
+          "respondWithOptions": {
+            "values": {
+              "formSubmittedText": "Thank you. Your KYC is being verified - you will receive an email with the outcome shortly."
+            }
+          }
+        }
+      },
+      "id": "99ff249a-56ea-4c99-be34-6e47177a07eb",
+      "name": "KYC Application Form",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -16,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const j = $json;\nconst pick = (k, label) => (j[k] !== undefined ? j[k] : (j[label] !== undefined ? j[label] : ''));\nconst errors = [];\nconst fullName = String(pick('full_name', 'Full name (as on PAN)')).trim().replace(/ +/g, ' ');\nconst pan = String(pick('pan', 'PAN number')).trim().toUpperCase().replace(/[^A-Z0-9]/g, '');\nconst aadhaar4 = String(pick('aadhaar_last4', 'Last 4 digits of Aadhaar')).replace(/[^0-9]/g, '');\nconst email = String(pick('email', 'Email')).trim().toLowerCase();\nconst mobile = String(pick('mobile', 'Mobile number')).replace(/[^0-9]/g, '').slice(-10);\nconst dobRaw = String(pick('dob', 'Date of birth')).slice(0, 10);\n\nif (!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan)) errors.push('PAN number format is invalid (expected AAAAA9999A)');\nelse if (pan.charAt(3) !== 'P') errors.push('PAN does not belong to an individual (4th character must be P)');\nif (!/^[0-9]{4}$/.test(aadhaar4)) errors.push('Aadhaar last 4 digits are invalid');\nif (!/^[^@ ]+@[^@ ]+[.][^@ ]+$/.test(email)) errors.push('Email address is invalid');\nif (!/^[6-9][0-9]{9}$/.test(mobile)) errors.push('Mobile number is invalid');\nif (fullName.split(' ').length < 2) errors.push('Full name must include first and last name');\n\nlet age = null;\nconst dob = new Date(dobRaw);\nif (isNaN(dob.getTime())) {\n  errors.push('Date of birth is invalid');\n} else {\n  age = Math.floor((Date.now() - dob.getTime()) / 31557600000);\n  if (age < 18) errors.push('Applicant must be at least 18 years old');\n  if (age > 100) errors.push('Date of birth looks implausible');\n}\n\nconst binKeys = Object.keys($input.item.binary || {});\nif (binKeys.length === 0) errors.push('PAN card image is missing');\n\nconst appId = 'KYC-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();\n\nreturn {\n  json: {\n    application_id: appId,\n    submitted_at: j.submittedAt || new Date().toISOString(),\n    full_name: fullName,\n    first_name: fullName.split(' ')[0],\n    dob: dobRaw,\n    age: age,\n    pan: pan,\n    pan_masked: pan.length === 10 ? pan.slice(0, 2) + 'XXXXX' + pan.slice(7) : pan,\n    aadhaar_masked: 'XXXX-XXXX-' + aadhaar4,\n    email: email,\n    mobile: mobile,\n    address: String(pick('address', 'Residential address')).trim(),\n    nationality: String(pick('nationality', 'Nationality')),\n    occupation: String(pick('occupation', 'Occupation')),\n    annual_income: String(pick('annual_income', 'Annual income')),\n    source_of_funds: String(pick('source_of_funds', 'Primary source of funds')),\n    pep_declared: String(pick('pep', 'Are you or a close relative a Politically Exposed Person (PEP)?')) === 'Yes',\n    validation_errors: errors,\n    input_valid: errors.length === 0\n  },\n  binary: binKeys.length ? { id_doc: $input.item.binary[binKeys[0]] } : {}\n};"
+      },
+      "id": "2a83fc7b-ea3d-4560-b3e4-27a07a8755b2",
+      "name": "Validate Inputs & Prepare Document",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        256,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Extract the KYC fields from the attached identity document image and return only the JSON object.",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are a KYC document verification specialist at an Indian bank. You read identity documents (primarily PAN cards) and extract fields exactly as printed. Rules: (1) Never guess - if a field is unreadable, return an empty string and lower extraction_confidence. (2) Return dates as YYYY-MM-DD. (3) document_type is one of PAN_CARD, AADHAAR, PASSPORT, DRIVING_LICENCE, VOTER_ID, OTHER, NOT_A_DOCUMENT. (4) is_government_id is true only for a genuine-looking government-issued ID. (5) legibility and extraction_confidence are 0 to 1. (6) tampering_signals lists concrete visual red flags (mismatched fonts, edited text regions, screenshot of a screen, photocopy of a photocopy, missing hologram/emblem, inconsistent layout); return [\"none\"] if you see none. You are not told what the applicant typed, so extract independently."
+            },
+            {
+              "type": "HumanMessagePromptTemplate",
+              "messageType": "imageBinary",
+              "binaryImageDataKey": "id_doc",
+              "imageDetail": "high"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "id": "59bd9a9a-32e6-49e2-ba7e-4c74bdf918d2",
+      "name": "AI Document Extraction",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        528,
+        496
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-5",
+          "cachedResultName": "Claude Sonnet 5"
+        },
+        "options": {
+          "maxTokensToSample": 1500
+        }
+      },
+      "id": "557bc1bc-b3b8-460a-a94b-7b999816bbec",
+      "name": "Claude - Document Vision",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.6,
+      "position": [
+        464,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{ \"document_type\": \"PAN_CARD\", \"is_government_id\": true, \"name_on_document\": \"RAHUL KUMAR SHARMA\", \"father_name_on_document\": \"SURESH KUMAR SHARMA\", \"dob_on_document\": \"1994-07-21\", \"id_number\": \"ABCPS1234K\", \"legibility\": 0.92, \"tampering_signals\": [\"none\"], \"extraction_confidence\": 0.9, \"notes\": \"Clear image, all fields readable\" }"
+      },
+      "id": "da10c5e9-39c6-4955-a978-00007bcb33e5",
+      "name": "Parse Extracted Fields",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        624,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const app = $('Validate Inputs & Prepare Document').item.json;\nconst doc = ($json && $json.output) ? $json.output : null;\n\nconst norm = s => String(s || '').toUpperCase().replace(/[^A-Z ]/g, ' ').replace(/ +/g, ' ').trim();\nconst lev = (a, b) => {\n  const m = a.length, n = b.length, d = [];\n  for (let i = 0; i <= m; i++) d[i] = [i];\n  for (let k = 1; k <= n; k++) d[0][k] = k;\n  for (let i = 1; i <= m; i++) for (let k = 1; k <= n; k++)\n    d[i][k] = Math.min(d[i - 1][k] + 1, d[i][k - 1] + 1, d[i - 1][k - 1] + (a[i - 1] === b[k - 1] ? 0 : 1));\n  return d[m][n];\n};\nconst sim = (a, b) => {\n  const x = norm(a).split(' ').sort().join(' ');\n  const y = norm(b).split(' ').sort().join(' ');\n  if (!x || !y) return 0;\n  return 1 - lev(x, y) / Math.max(x.length, y.length);\n};\nconst round2 = v => Math.round(v * 100) / 100;\n\nconst flags = [];\nlet score = 0;\nconst add = (flag, points) => { flags.push(flag); score += points; };\n\nlet nameScore = null, dobMatch = null, panMatch = null;\nif (!doc) {\n  add('DOC_EXTRACTION_FAILED', 40);\n} else {\n  if (!doc.is_government_id) add('NOT_A_GOVT_ID', 40);\n  nameScore = round2(sim(app.full_name, doc.name_on_document));\n  if (nameScore < 0.85) add('NAME_MISMATCH', 25);\n  else if (nameScore < 0.95) add('NAME_MINOR_VARIATION', 5);\n  dobMatch = String(doc.dob_on_document || '').slice(0, 10) === app.dob;\n  if (!dobMatch) add('DOB_MISMATCH', 25);\n  panMatch = String(doc.id_number || '').toUpperCase().replace(/[^A-Z0-9]/g, '') === app.pan;\n  if (!panMatch) add('PAN_MISMATCH', 30);\n  const tamper = (doc.tampering_signals || []).filter(t => t && String(t).toLowerCase() !== 'none');\n  if (tamper.length) add('POSSIBLE_TAMPERING: ' + tamper.join('; '), 30);\n  if (Number(doc.legibility) < 0.6) add('LOW_LEGIBILITY', 15);\n  if (Number(doc.extraction_confidence) < 0.7) add('LOW_EXTRACTION_CONFIDENCE', 10);\n}\n\n// DEMO watchlist (fictional names). In production replace with an HTTP Request to OpenSanctions / Refinitiv World-Check / Dow Jones / LexisNexis.\nconst WATCHLIST = [\n  { name: 'Viktor Aleksandrovich Morozov', list: 'DEMO-OFAC-SDN', type: 'SANCTION', dob: '1968-03-14' },\n  { name: 'Imran Rashid Qureshi', list: 'DEMO-UN-1267', type: 'SANCTION', dob: '1975-11-02' },\n  { name: 'Chen Wei Long', list: 'DEMO-EU-CFSP', type: 'SANCTION', dob: '' },\n  { name: 'Daniel Okafor Mensah', list: 'DEMO-INTERPOL-RED', type: 'SANCTION', dob: '1981-06-30' },\n  { name: 'Arvind Prakash Bhandari', list: 'DEMO-PEP-STATE-MINISTER', type: 'PEP', dob: '1962-01-19' }\n];\nconst hits = [];\nfor (const w of WATCHLIST) {\n  const s = sim(app.full_name, w.name);\n  if (s >= 0.85) {\n    const dobCorroborated = w.dob ? w.dob === app.dob : null;\n    const strength = (dobCorroborated === true || s >= 0.95) ? 'STRONG' : (dobCorroborated === false ? 'WEAK_DOB_DIFFERS' : 'POSSIBLE');\n    hits.push({ watchlist_name: w.name, list: w.list, type: w.type, similarity: round2(s), dob_corroborated: dobCorroborated, strength: strength });\n  }\n}\nif (hits.some(h => h.strength === 'STRONG')) add('WATCHLIST_STRONG_MATCH', 60);\nelse if (hits.length) add('WATCHLIST_POSSIBLE_MATCH', 35);\n\nif (app.pep_declared) add('PEP_SELF_DECLARED', 30);\nif (app.nationality !== 'Indian') add('NON_RESIDENT_EDD_REQUIRED', 10);\nif (app.occupation === 'Student' && ['Rs 25 lakh - 1 crore', 'Above Rs 1 crore'].includes(app.annual_income)) add('INCOME_PROFILE_INCONSISTENT', 15);\nif (app.source_of_funds === 'Other') add('UNCLEAR_SOURCE_OF_FUNDS', 5);\nif (app.validation_errors.length) add('INPUT_VALIDATION_FAILED', 20);\n\nreturn {\n  json: {\n    ...app,\n    document_extraction: doc,\n    name_match_score: nameScore,\n    dob_match: dobMatch,\n    pan_match: panMatch,\n    screening_hits: hits,\n    rule_flags: flags,\n    rule_score: Math.min(score, 100)\n  }\n};"
+      },
+      "id": "a011a373-dbb9-4cc5-80d7-bfec1490454a",
+      "name": "Cross-Check & Sanctions Screening",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        912,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Assess this KYC application. Evidence collected by upstream checks:\n{{ JSON.stringify({ application_id: $json.application_id, age: $json.age, nationality: $json.nationality, occupation: $json.occupation, annual_income: $json.annual_income, source_of_funds: $json.source_of_funds, pep_declared: $json.pep_declared, input_validation_errors: $json.validation_errors, document_extraction: $json.document_extraction, name_match_score: $json.name_match_score, dob_match: $json.dob_match, pan_match: $json.pan_match, watchlist_hits: $json.screening_hits, rule_flags: $json.rule_flags, rule_score: $json.rule_score }, null, 2) }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are a senior KYC/AML analyst applying a risk-based approach in line with RBI Master Direction on KYC and FATF guidance. Using ONLY the evidence provided, produce: risk_level (LOW, MEDIUM, HIGH); ai_risk_score 0-100; recommended_action (APPROVE, REVIEW, REJECT); a concise, factual rationale an auditor could follow, citing the specific evidence; key_concerns as a list ([\"none\"] if none); and customer_safe_message - a polite 1-2 sentence note to the applicant. Rules: Recommend APPROVE only when name, DOB and PAN all match, the document looks genuine and legible, there are no watchlist hits and no PEP declaration. Any watchlist hit, PEP, tampering signal or identity mismatch requires REVIEW or REJECT. Do not invent facts. IMPORTANT: customer_safe_message must NEVER mention sanctions, watchlists, PEP screening, fraud suspicion or internal risk scores (anti tipping-off); if documents are unclear just ask for a clearer upload."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "id": "6b393c69-d566-478a-b18c-156f4230cad7",
+      "name": "AI Risk Assessment",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1120,
+        496
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-5",
+          "cachedResultName": "Claude Sonnet 5"
+        },
+        "options": {
+          "maxTokensToSample": 1500
+        }
+      },
+      "id": "38327e1b-82ce-4f29-8dfb-b5a08adad1b9",
+      "name": "Claude - Risk Analyst",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.6,
+      "position": [
+        1104,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{ \"risk_level\": \"LOW\", \"ai_risk_score\": 12, \"recommended_action\": \"APPROVE\", \"rationale\": \"Document data matches the application on name, DOB and PAN; no watchlist hits; salaried profile consistent with declared income.\", \"key_concerns\": [\"none\"], \"customer_safe_message\": \"Your identity has been verified successfully.\" }"
+      },
+      "id": "130fcde0-2aeb-4a83-8ae9-659815c199e5",
+      "name": "Parse Risk Assessment",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1264,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const f = $('Cross-Check & Sanctions Screening').item.json;\nconst ai = ($json && $json.output) ? $json.output : {};\nconst aiAvailable = Number.isFinite(Number(ai.ai_risk_score));\nconst aiScore = aiAvailable ? Number(ai.ai_risk_score) : 100;\nconst finalScore = Math.min(100, Math.max(f.rule_score, aiScore));\nconst level = finalScore < 30 ? 'LOW' : (finalScore < 60 ? 'MEDIUM' : 'HIGH');\nconst docProblem = f.rule_flags.some(x => ['DOC_EXTRACTION_FAILED', 'NOT_A_GOVT_ID', 'LOW_LEGIBILITY'].includes(x));\n\nlet decision, reason;\nif (f.screening_hits.length > 0) {\n  decision = 'MANUAL_REVIEW'; reason = 'Potential watchlist match - only a human can disposition this';\n} else if (f.validation_errors.length > 0 || docProblem) {\n  decision = 'REQUEST_INFO'; reason = 'Incomplete, invalid or unreadable submission';\n} else if (!aiAvailable || f.pep_declared || ai.recommended_action !== 'APPROVE' || finalScore >= 30) {\n  decision = 'MANUAL_REVIEW'; reason = 'Risk signals need analyst judgement';\n} else {\n  decision = 'AUTO_APPROVE'; reason = 'All checks passed with low risk (straight-through processing)';\n}\n\nconst started = new Date(f.submitted_at).getTime();\nconst processingMs = isNaN(started) ? null : Date.now() - started;\n\nconst esc = s => String(s === null || s === undefined ? '' : s).replace(/[&<>\"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;' }[c]));\nconst row = (k, v) => '<tr><td style=\"padding:6px 10px;color:#555;border-bottom:1px solid #eee\">' + k + '</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee\"><b>' + v + '</b></td></tr>';\nconst doc = f.document_extraction || {};\nconst hitsHtml = f.screening_hits.length\n  ? f.screening_hits.map(h => esc(h.watchlist_name) + ' [' + esc(h.list) + '] similarity ' + h.similarity + ', DOB corroborated: ' + h.dob_corroborated + ' (' + h.strength + ')').join('<br>')\n  : 'None';\nconst reviewerHtml = '<div style=\"font-family:Arial,sans-serif;max-width:680px\">'\n  + '<h2 style=\"margin:0 0 4px\">KYC case ' + esc(f.application_id) + ' needs your review</h2>'\n  + '<p style=\"color:#555;margin:0 0 12px\">Routed to manual review: ' + esc(reason) + '</p>'\n  + '<table style=\"border-collapse:collapse;width:100%\">'\n  + row('Applicant', esc(f.full_name) + ' (age ' + esc(f.age) + ')')\n  + row('PAN / Aadhaar', esc(f.pan_masked) + ' / ' + esc(f.aadhaar_masked))\n  + row('Profile', esc(f.occupation) + ', ' + esc(f.annual_income) + ', funds: ' + esc(f.source_of_funds) + ', ' + esc(f.nationality))\n  + row('PEP self-declared', f.pep_declared ? 'YES' : 'No')\n  + row('Document read', esc(doc.document_type) + ' - name \"' + esc(doc.name_on_document) + '\", DOB ' + esc(doc.dob_on_document) + ', ID ' + esc(doc.id_number))\n  + row('Name match score', esc(f.name_match_score))\n  + row('DOB / PAN match', esc(f.dob_match) + ' / ' + esc(f.pan_match))\n  + row('Watchlist screening', hitsHtml)\n  + row('Rule flags', esc(f.rule_flags.join(', ') || 'None'))\n  + row('Risk', level + ' (' + finalScore + '/100; rules ' + f.rule_score + ', AI ' + (aiAvailable ? aiScore : 'n/a') + ')')\n  + row('AI recommendation', esc(ai.recommended_action || 'n/a'))\n  + row('AI rationale', esc(ai.rationale || 'AI assessment unavailable'))\n  + '</table><p style=\"color:#888;font-size:12px\">The AI recommends; you decide. Your decision is written to the audit trail.</p></div>';\n\nconst friendly = {\n  DOC_EXTRACTION_FAILED: 'We could not read the uploaded document. Please upload a clear photo of your PAN card.',\n  NOT_A_GOVT_ID: 'The uploaded file does not appear to be a PAN card. Please upload a photo of your original PAN card.',\n  LOW_LEGIBILITY: 'The PAN card photo is blurry or cropped. Please retake it in good light with all four corners visible.'\n};\nconst issues = f.validation_errors.concat(f.rule_flags.filter(x => friendly[x]).map(x => friendly[x]));\nconst issuesHtml = '<ul>' + issues.map(i => '<li>' + esc(i) + '</li>').join('') + '</ul>';\n\nreturn {\n  json: {\n    application_id: f.application_id,\n    full_name: f.full_name,\n    first_name: f.first_name,\n    email: f.email,\n    decision: decision,\n    decision_reason: reason,\n    risk_level: level,\n    final_risk_score: finalScore,\n    rule_score: f.rule_score,\n    ai_risk_score: aiAvailable ? aiScore : null,\n    ai_recommendation: ai.recommended_action || 'UNAVAILABLE',\n    flags_text: f.rule_flags.join(', ') || 'none',\n    rationale: ai.rationale || reason,\n    customer_message: ai.customer_safe_message || 'Thank you for your application.',\n    issues_html: issuesHtml,\n    reviewer_html: reviewerHtml,\n    straight_through: decision === 'AUTO_APPROVE',\n    processing_ms: processingMs\n  }\n};"
+      },
+      "id": "26661b7e-6e30-4dcf-a5a0-1ddf024fb6b2",
+      "name": "Decision Engine (Guardrails)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1424,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_DATA_TABLE_ID",
+          "cachedResultName": "kyc_audit_log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "application_id": "={{ $json.application_id }}",
+            "event_type": "SYSTEM_DECISION",
+            "applicant_name": "={{ $json.full_name }}",
+            "email": "={{ $json.email }}",
+            "decision": "={{ $json.decision }}",
+            "risk_level": "={{ $json.risk_level }}",
+            "risk_score": "={{ $json.final_risk_score }}",
+            "flags": "={{ $json.flags_text }}",
+            "rationale": "={{ $json.rationale }}",
+            "actor": "={{ \"workflow:\" + $workflow.name + \" / AI:\" + $json.ai_recommendation }}",
+            "straight_through": "={{ $json.straight_through }}",
+            "processing_ms": "={{ $json.processing_ms }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "application_id",
+              "displayName": "application_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "event_type",
+              "displayName": "event_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "applicant_name",
+              "displayName": "applicant_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "decision",
+              "displayName": "decision",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "risk_level",
+              "displayName": "risk_level",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "risk_score",
+              "displayName": "risk_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "flags",
+              "displayName": "flags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "rationale",
+              "displayName": "rationale",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "actor",
+              "displayName": "actor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "straight_through",
+              "displayName": "straight_through",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "processing_ms",
+              "displayName": "processing_ms",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "2cb5fca2-3a9d-47f2-8d77-9d30f6450364",
+      "name": "Log Decision to Audit Trail",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1712,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 4
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.decision }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "AUTO_APPROVE",
+                    "id": "451c8b8b-be2f-41ed-8ebc-caed095e4cd0"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Auto-approve"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 4
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.decision }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "REQUEST_INFO",
+                    "id": "e0951a51-302b-48e0-ad4f-fdea9c78b1c6"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Request info"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 4
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.decision }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "MANUAL_REVIEW",
+                    "id": "e73ced66-2764-492e-8bc7-584cdf7dc567"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Manual review"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ba3f6100-08dc-4842-b136-ab8e5a55ceb1",
+      "name": "Route by Decision",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.5,
+      "position": [
+        1872,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "=Your KYC is verified - welcome aboard ({{ $json.application_id }})",
+        "message": "=<div style=\"font-family:Arial,sans-serif\"><p>Hi {{ $json.first_name }},</p><p>Good news - your identity has been verified and your account is now active.</p><p>Reference: <b>{{ $json.application_id }}</b></p><p>Thank you for choosing us.</p></div>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "a22767ef-e1f3-4211-99e1-967f2fc08d7b",
+      "name": "Email - Account Approved",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2224,
+        544
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "=Action needed to complete your KYC ({{ $json.application_id }})",
+        "message": "=<div style=\"font-family:Arial,sans-serif\"><p>Hi {{ $json.first_name }},</p><p>We could not complete your verification yet. Please fix the following and resubmit the form:</p>{{ $json.issues_html }}<p>Reference: <b>{{ $json.application_id }}</b></p></div>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "01461ba0-90a5-4b82-943d-f5fef8487989",
+      "name": "Email - Request Corrected Details",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2224,
+        720
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "sendTo": "compliance@example.com",
+        "subject": "=[KYC REVIEW] {{ $json.risk_level }} risk - {{ $json.full_name }} ({{ $json.application_id }})",
+        "message": "={{ $json.reviewer_html }}",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double",
+            "approveLabel": "Approve onboarding",
+            "disapproveLabel": "Decline / escalate"
+          }
+        },
+        "options": {
+          "limitWaitTime": {
+            "values": {
+              "resumeAmount": 2,
+              "resumeUnit": "days"
+            }
+          },
+          "appendAttribution": false
+        }
+      },
+      "id": "c950897c-16a6-4629-b10a-a7b65862017f",
+      "name": "Compliance Officer Review",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2224,
+        928
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.data?.approved === true }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "id": "bb511c56-3ef9-4682-94f7-cc94302dc9da"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "2888827c-f051-4138-9835-0fe7c6fba96d",
+      "name": "Reviewer Approved?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2464,
+        928
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Decision Engine (Guardrails)').item.json.email }}",
+        "subject": "=Your KYC is verified ({{ $('Decision Engine (Guardrails)').item.json.application_id }})",
+        "message": "=<div style=\"font-family:Arial,sans-serif\"><p>Hi {{ $('Decision Engine (Guardrails)').item.json.first_name }},</p><p>Thank you for your patience. Your verification is complete and your account is now active.</p><p>Reference: <b>{{ $('Decision Engine (Guardrails)').item.json.application_id }}</b></p></div>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "415f9f28-6ea8-45d2-87bd-448bfe27c440",
+      "name": "Email - Approved After Review",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2704,
+        848
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_DATA_TABLE_ID",
+          "cachedResultName": "kyc_audit_log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "application_id": "={{ $('Decision Engine (Guardrails)').item.json.application_id }}",
+            "event_type": "HUMAN_DECISION",
+            "applicant_name": "={{ $('Decision Engine (Guardrails)').item.json.full_name }}",
+            "email": "={{ $('Decision Engine (Guardrails)').item.json.email }}",
+            "decision": "APPROVED_BY_REVIEWER",
+            "risk_level": "={{ $('Decision Engine (Guardrails)').item.json.risk_level }}",
+            "risk_score": "={{ $('Decision Engine (Guardrails)').item.json.final_risk_score }}",
+            "flags": "={{ $('Decision Engine (Guardrails)').item.json.flags_text }}",
+            "rationale": "={{ 'Reviewer approved at ' + ($('Compliance Officer Review').item.json.data?.respondedAt ?? $now.toISO()) }}",
+            "actor": "reviewer@example.com",
+            "straight_through": false,
+            "processing_ms": "={{ $('Decision Engine (Guardrails)').item.json.processing_ms }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "application_id",
+              "displayName": "application_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "event_type",
+              "displayName": "event_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "applicant_name",
+              "displayName": "applicant_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "decision",
+              "displayName": "decision",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "risk_level",
+              "displayName": "risk_level",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "risk_score",
+              "displayName": "risk_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "flags",
+              "displayName": "flags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "rationale",
+              "displayName": "rationale",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "actor",
+              "displayName": "actor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "straight_through",
+              "displayName": "straight_through",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "processing_ms",
+              "displayName": "processing_ms",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "3af58293-a25e-4c19-9353-2e1847a71202",
+      "name": "Log Reviewer Approval",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2944,
+        848
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Decision Engine (Guardrails)').item.json.email }}",
+        "subject": "=Update on your application ({{ $('Decision Engine (Guardrails)').item.json.application_id }})",
+        "message": "=<div style=\"font-family:Arial,sans-serif\"><p>Hi {{ $('Decision Engine (Guardrails)').item.json.first_name }},</p><p>We need a little more information to complete your verification. Our team will contact you within 2 working days, or you can visit your nearest branch with your original PAN card.</p><p>Reference: <b>{{ $('Decision Engine (Guardrails)').item.json.application_id }}</b></p></div>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "71357f4a-7036-44ce-aa30-806a7f5a42f1",
+      "name": "Email - Additional Verification Needed",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2704,
+        1024
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_DATA_TABLE_ID",
+          "cachedResultName": "kyc_audit_log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "application_id": "={{ $('Decision Engine (Guardrails)').item.json.application_id }}",
+            "event_type": "HUMAN_DECISION",
+            "applicant_name": "={{ $('Decision Engine (Guardrails)').item.json.full_name }}",
+            "email": "={{ $('Decision Engine (Guardrails)').item.json.email }}",
+            "decision": "={{ $('Compliance Officer Review').item.json.data?.approved === false ? 'DECLINED_OR_ESCALATED' : 'REVIEW_TIMED_OUT' }}",
+            "risk_level": "={{ $('Decision Engine (Guardrails)').item.json.risk_level }}",
+            "risk_score": "={{ $('Decision Engine (Guardrails)').item.json.final_risk_score }}",
+            "flags": "={{ $('Decision Engine (Guardrails)').item.json.flags_text }}",
+            "rationale": "Reviewer declined or escalated (consider EDD / STR filing to FIU-IND if suspicion persists)",
+            "actor": "reviewer@example.com",
+            "straight_through": false,
+            "processing_ms": "={{ $('Decision Engine (Guardrails)').item.json.processing_ms }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "application_id",
+              "displayName": "application_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "event_type",
+              "displayName": "event_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "applicant_name",
+              "displayName": "applicant_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "decision",
+              "displayName": "decision",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "risk_level",
+              "displayName": "risk_level",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "risk_score",
+              "displayName": "risk_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "flags",
+              "displayName": "flags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "rationale",
+              "displayName": "rationale",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "actor",
+              "displayName": "actor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "straight_through",
+              "displayName": "straight_through",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "processing_ms",
+              "displayName": "processing_ms",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "86d33bc9-be61-4a7b-b629-f742ee0f8e69",
+      "name": "Log Reviewer Decline",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2944,
+        1024
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## AI-assisted KYC Onboarding (POC)\n\n**Goal:** cut manual KYC checks, onboard low-risk customers in seconds, and send only real exceptions to a human.\n\n**Flow:** Form -> deterministic validation (PAN/age/email/mobile) -> Claude vision reads the PAN card blind -> cross-check form vs document + fuzzy watchlist screening with DOB as secondary identifier -> Claude risk analyst writes an auditable rationale -> code guardrails make the final routing decision -> every decision written to the `kyc_audit_log` data table.\n\n**Guardrails:** AI never auto-rejects; any watchlist hit or PEP always goes to a human; customer emails never reveal screening (anti tipping-off).\n\n**Before going live:** swap the DEMO watchlist for OpenSanctions/World-Check via HTTP Request, add DigiLocker/CKYC lookups, set the compliance inbox.",
+        "height": 360,
+        "width": 640,
+        "color": 4
+      },
+      "id": "020be88b-79be-5d91-b8c4-cffdf197b07d",
+      "name": "Note - overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### 🧰 Built with\n- **n8n Form Trigger** for intake, **Code nodes** for rules and guardrails\n- **Claude Sonnet** as document reader (vision) and risk analyst\n- **Gmail send-and-wait** for one-click human approval\n- **n8n Data Table** (`kyc_audit_log`) as the audit trail",
+        "height": 180,
+        "width": 640,
+        "color": 7
+      },
+      "id": "bf51f700-f93d-5bd9-9814-212958ee2603",
+      "name": "Note - stack",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        528
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### 1. Intake & rules\nRegex + age checks run **before any AI call**, so bad submissions cost nothing.\n- PAN format AAAAA9999A, 4th letter P\n- Age 18-100, valid email and mobile\n- Only the last 4 Aadhaar digits are collected",
+        "height": 190,
+        "width": 380,
+        "color": 7
+      },
+      "id": "03937696-0938-5010-9a94-0d4de6827bb7",
+      "name": "Note - s1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        552
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### 2. AI document intelligence\nClaude reads the PAN card **blind** - it never sees what the applicant typed.\n- Extracts name, DOB and PAN number\n- Scores legibility and extraction confidence\n- Lists visual tampering signals",
+        "height": 180,
+        "width": 400,
+        "color": 6
+      },
+      "id": "3d2fec77-d3f3-541d-8fe1-72344a043cbb",
+      "name": "Note - s2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        416,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### 3. Screening, risk & guardrails\n- Form vs document match: fuzzy name, exact DOB and PAN\n- Fuzzy watchlist screening with DOB as the second identifier\n- Rules score vs AI score: **the higher one wins**\n- Code, not the LLM, makes the final routing call",
+        "height": 180,
+        "width": 720,
+        "color": 3
+      },
+      "id": "4201ef40-9a20-506a-8996-b0042f4d1415",
+      "name": "Note - s3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        864,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### 🗂 Audit trail\nEvery system decision is written to the `kyc_audit_log` data table.\n\nHuman approvals and declines are logged too, so an auditor can replay any case end to end.",
+        "height": 250,
+        "width": 220,
+        "color": 2
+      },
+      "id": "a0fe0975-1688-5960-84de-c1d5228d4fdd",
+      "name": "Note - audit",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1632,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### 4. Routing, human-in-the-loop & audit\n- **Auto-approve** - every check passes and final risk is below 30\n- **Request info** - invalid input or an unreadable document; the applicant is told exactly what to fix\n- **Manual review** - any watchlist hit, PEP or risk signal; a compliance officer gets Approve / Decline buttons by email (2-day timeout)\n- Customer emails never mention screening (anti tipping-off)",
+        "height": 200,
+        "width": 1200,
+        "color": 5
+      },
+      "id": "b08dc1e2-4a39-539e-8a09-8ed0e2b31894",
+      "name": "Note - s4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1904,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### 🧪 Try it\nSubmit the form with a clear PAN card photo:\n- Your own correct details -> **Auto-approve**\n- Name `Imran Rashid Qureshi` -> demo watchlist hit -> **Manual review**\n- A blurry or cropped photo -> **Request info**",
+        "height": 210,
+        "width": 400,
+        "color": 6
+      },
+      "id": "431d7f09-f845-5c92-b2fe-c05e04635271",
+      "name": "Note - test",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        416,
+        960
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### 📊 Risk score cheat-sheet\n- Watchlist strong match **+60**, possible match **+35**\n- Document unreadable or not a government ID **+40**\n- PAN mismatch, PEP declared or tampering signals **+30** each\n- Name or DOB mismatch **+25** each\n- Input validation failed **+20**\n\n**LOW** < 30 · **MEDIUM** 30-59 · **HIGH** 60+",
+        "height": 210,
+        "width": 720,
+        "color": 3
+      },
+      "id": "cf831f04-6561-53ab-84e0-63d043905eb2",
+      "name": "Note - cheat",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        864,
+        960
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### 🚀 Before going live\n- Replace the DEMO watchlist with OpenSanctions / World-Check via an HTTP Request node\n- Add DigiLocker / CKYC lookups for a second identity source\n- Send review emails to a shared compliance inbox, not a personal one\n- Attach an error workflow so failed runs raise an alert",
+        "height": 170,
+        "width": 1280,
+        "color": 1
+      },
+      "id": "4b6bd9b2-fe00-5724-968a-7c045af55c6f",
+      "name": "Note - golive",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1824,
+        1272
+      ]
+    }
+  ],
+  "connections": {
+    "KYC Application Form": {
+      "main": [
+        [
+          {
+            "node": "Validate Inputs & Prepare Document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Inputs & Prepare Document": {
+      "main": [
+        [
+          {
+            "node": "AI Document Extraction",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Document Extraction": {
+      "main": [
+        [
+          {
+            "node": "Cross-Check & Sanctions Screening",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude - Document Vision": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Document Extraction",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Extracted Fields": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Document Extraction",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cross-Check & Sanctions Screening": {
+      "main": [
+        [
+          {
+            "node": "AI Risk Assessment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Risk Assessment": {
+      "main": [
+        [
+          {
+            "node": "Decision Engine (Guardrails)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude - Risk Analyst": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Risk Assessment",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Risk Assessment": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Risk Assessment",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decision Engine (Guardrails)": {
+      "main": [
+        [
+          {
+            "node": "Log Decision to Audit Trail",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Route by Decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Decision": {
+      "main": [
+        [
+          {
+            "node": "Email - Account Approved",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Email - Request Corrected Details",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Compliance Officer Review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compliance Officer Review": {
+      "main": [
+        [
+          {
+            "node": "Reviewer Approved?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reviewer Approved?": {
+      "main": [
+        [
+          {
+            "node": "Email - Approved After Review",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Email - Additional Verification Needed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email - Approved After Review": {
+      "main": [
+        [
+          {
+            "node": "Log Reviewer Approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email - Additional Verification Needed": {
+      "main": [
+        [
+          {
+            "node": "Log Reviewer Decline",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "nodeGroups": [
+    {
+      "id": "6d72c68e-9b74-4030-9030-40fc5f5ace04",
+      "name": "AI Document Intelligence",
+      "nodeIds": [
+        "59bd9a9a-32e6-49e2-ba7e-4c74bdf918d2",
+        "557bc1bc-b3b8-460a-a94b-7b999816bbec",
+        "da10c5e9-39c6-4955-a978-00007bcb33e5"
+      ],
+      "description": "Claude reads the uploaded PAN card blind and returns structured fields, legibility and tampering signals"
+    },
+    {
+      "id": "c2337bbe-9568-40e3-91bd-e4db963e7eef",
+      "name": "Screening & Risk Decision",
+      "nodeIds": [
+        "a011a373-dbb9-4cc5-80d7-bfec1490454a",
+        "6b393c69-d566-478a-b18c-156f4230cad7",
+        "38327e1b-82ce-4f29-8dfb-b5a08adad1b9",
+        "130fcde0-2aeb-4a83-8ae9-659815c199e5",
+        "26661b7e-6e30-4dcf-a5a0-1ddf024fb6b2"
+      ],
+      "description": "Form-vs-document match, fuzzy watchlist screening, AI risk rationale, then code guardrails pick the route"
+    },
+    {
+      "id": "e17eb861-45a5-4a00-9f19-29843cb7bed0",
+      "name": "Routing & Human Review",
+      "nodeIds": [
+        "ba3f6100-08dc-4842-b136-ab8e5a55ceb1",
+        "a22767ef-e1f3-4211-99e1-967f2fc08d7b",
+        "01461ba0-90a5-4b82-943d-f5fef8487989",
+        "c950897c-16a6-4629-b10a-a7b65862017f",
+        "2888827c-f051-4138-9835-0fe7c6fba96d",
+        "415f9f28-6ea8-45d2-87bd-448bfe27c440",
+        "3af58293-a25e-4c19-9353-2e1847a71202",
+        "71357f4a-7036-44ce-aa30-806a7f5a42f1",
+        "86d33bc9-be61-4a7b-b629-f742ee0f8e69"
+      ],
+      "description": "Auto-approve, ask for fixes, or email a compliance officer with Approve/Decline buttons; human decisions are logged"
+    }
+  ],
+  "tags": []
+}
